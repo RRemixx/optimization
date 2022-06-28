@@ -220,6 +220,46 @@ module decoder(
 endmodule // decoder
 
 
+module detector(
+	input clock,
+	input [4:0] rda_idx,
+	input [4:0] rdb_idx,
+	input [4:0] dest_idx,
+
+	output logic [4:0] fwd_out
+);
+
+	logic [4:0] ex_stage_rd_idx;
+	logic [4:0] me_stage_rd_idx;
+	logic [4:0] wb_stage_rd_idx;
+	logic detect_finished;
+
+	localparam [4:0] D1 = 4'd0;
+	localparam [4:0] D2 = 4'd1;
+	localparam [4:0] L1 = 4'd2;
+	localparam [4:0] L2 = 4'd2;
+	localparam [4:0] C1 = 4'd2;
+	localparam [4:0] M1 = 4'd3;
+	localparam [4:0] NH = 4'd4;  // no hazard
+
+	wire ld_fwd_out;
+	assign ld_fwd_out = (detect_finished == 1'b0);
+
+	wire [4:0] fwd_out_wire;
+	assign fwd_out_wire = (dest_idx == ex_stage_rd_idx) ? D1
+
+
+	always_comb begin
+		if (!detect_finished) begin
+			if (dest_idx == ex_stage_rd_idx)
+
+		end
+		else 
+	end
+	
+endmodule
+
+
 module id_stage(         
 	input         clock,              // system clock
 	input         reset,              // system reset

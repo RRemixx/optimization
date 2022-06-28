@@ -69,10 +69,10 @@ typedef enum logic [3:0] {
 // ALU opA input mux selects
 //
 typedef enum logic [1:0] {
-	OPA_IS_RS1  = 2'h0,
-	OPA_IS_NPC  = 2'h1,
-	OPA_IS_PC   = 2'h2,
-	OPA_IS_ZERO = 2'h3
+	OPA_IS_RS1  = 3'h0,
+	OPA_IS_NPC  = 3'h1,
+	OPA_IS_PC   = 3'h2,
+	OPA_IS_ZERO = 3'h3
 } ALU_OPA_SELECT;
 
 //
@@ -263,6 +263,9 @@ typedef struct packed {
 //////////////////////////////////////////////
 
 typedef struct packed {
+	logic [2:0] ra_fwd_type;
+	logic [2:0] rb_fwd_type;
+
 	logic [`XLEN-1:0] NPC;   // PC + 4
 	logic [`XLEN-1:0] PC;    // PC
 
@@ -296,5 +299,10 @@ typedef struct packed {
 	logic             halt, illegal, csr_op, valid;
 	logic [2:0]       mem_size; // byte, half-word or word
 } EX_MEM_PACKET;
+
+typedef struct packed {
+	logic [4:0] dest_reg_idx;
+	logic inst_is_load;
+} DETECTOR_PACKET;
 
 `endif // __SYS_DEFS_VH__
