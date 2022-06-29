@@ -65,6 +65,19 @@ typedef enum logic [3:0] {
 //
 //////////////////////////////////////////////
 
+// 
+// forwared to ALU opA/B mux selects
+// 
+typedef enum logic [2:0] {
+	FWD_NH = 3'h0;  	// no hazard
+	FWD_D1 = 3'h1;     	// forward from mem
+	FWD_D2 = 3'h2;		// forward from wb
+	FWD_D3 = 3'h3;     	// load and use
+	FWD_C1 = 3'h4;		// control
+	FWD_M1 = 3'h5;     	// memory 
+} FWD_SELECT
+
+
 //
 // ALU opA input mux selects
 //
@@ -263,8 +276,8 @@ typedef struct packed {
 //////////////////////////////////////////////
 
 typedef struct packed {
-	logic [2:0] ra_fwd_type;
-	logic [2:0] rb_fwd_type;
+	FWD_SELECT ra_fwd_type;
+	FWD_SELECT rb_fwd_type;
 
 	logic load_use_stall;
 

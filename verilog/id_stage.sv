@@ -226,28 +226,21 @@ module hazard_comparator(
 	input DETECTOR_PACKET wb_dp,
 	input [4:0] ra_idx,
 
-	output logic [2:0] fwd_out
+	FWD_SELECT fwd_out
 );
-
-	localparam [2:0] NH = 3'd0;  	// no hazard
-	localparam [2:0] D1 = 3'd1;     // forward from mem
-	localparam [2:0] D2 = 3'd2;		// forward from wb
-	localparam [2:0] D3 = 3'd3;     // load and use
-	localparam [2:0] C1 = 3'd4;		// control
-	localparam [2:0] M1 = 3'd5;     // memory 
 
 	always_comb begin
 		if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
-			fwd_out = D1;
+			fwd_out = FWD_D1;
 		end 
 		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
-			fwd_out = D2;
+			fwd_out = FWD_D2;
 		end
 		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
-			fwd_out = D3;
+			fwd_out = FWD_D3;
 		end
 		else begin
-			fwd_out = NH;
+			fwd_out = FWD_NH;
 		end
 	end
 
@@ -371,6 +364,6 @@ module id_stage(
 		.rb_fwd_out(id_packet_out.rb_fwd_type)
 	);
 
-	assign id_packet_out.load_use_stall = (id_packet_out.ra_fwd_type == D3) | (id_packet_out.ra_fwd_type == D3);    // load use hazard or not
+	assign id_packet_out.load_use_stall = (id_packet_out.ra_fwd_type == FWD_D3) | (id_packet_out.ra_fwd_type == FWD_D3);    // load use hazard or not
    
 endmodule // module id_stage

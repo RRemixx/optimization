@@ -256,6 +256,8 @@ module pipeline (
 		// Inputs
 		.clock(clock),
 		.reset(reset),
+		.fwd_ex_result(ex_mem_packet.alu_result),
+		.fwd_mem_result(mem_result_out),
 		.id_ex_packet_in(id_ex_packet),
 		// Outputs
 		.ex_packet_out(ex_packet)

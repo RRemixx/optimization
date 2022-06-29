@@ -99,6 +99,8 @@ endmodule // brcond
 module ex_stage(
 	input clock,               // system clock
 	input reset,               // system reset
+	input fwd_ex_result,	   // forward result from EX stage
+	input fwd_mem_result,      // forward result from MEM stage   
 	input ID_EX_PACKET   id_ex_packet_in,
 	output EX_MEM_PACKET ex_packet_out
 );
@@ -122,7 +124,14 @@ module ex_stage(
 	always_comb begin
 		opa_mux_out = `XLEN'hdeadfbac;
 		case (id_ex_packet_in.opa_select)
-			OPA_IS_RS1:  opa_mux_out = id_ex_packet_in.rs1_value;
+			OPA_IS_RS1:  begin
+				case (id_ex_packet_in.ra_fwd_type)
+					FWD_NH : opa_mux_out = id_ex_packet_in.rs1_value;
+					FWD_D1 : opa_mux_out = fwd_ex_result;
+					FWD_D2 : opa_mux_out = fwd_mem_result;
+					FWD_D3 : opa_mux_out = fwd_mem_result;
+					default : opa_mux_out = id_ex_packet_in.rs1_value;
+			end
 			OPA_IS_NPC:  opa_mux_out = id_ex_packet_in.NPC;
 			OPA_IS_PC:   opa_mux_out = id_ex_packet_in.PC;
 			OPA_IS_ZERO: opa_mux_out = 0;
@@ -137,7 +146,14 @@ module ex_stage(
 		// value on the output of the mux you have an invalid opb_select
 		opb_mux_out = `XLEN'hfacefeed;
 		case (id_ex_packet_in.opb_select)
-			OPB_IS_RS2:   opb_mux_out = id_ex_packet_in.rs2_value;
+			OPB_IS_RS2:  begin
+				case (id_ex_packet_in.ra_fwd_type)
+					FWD_NH : opb_mux_out = id_ex_packet_in.rs2_value;
+					FWD_D1 : opb_mux_out = fwd_ex_result;
+					FWD_D2 : opb_mux_out = fwd_mem_result;
+					FWD_D3 : opb_mux_out = fwd_mem_result;
+					default : opb_mux_out = id_ex_packet_in.rs2_value;
+			end
 			OPB_IS_I_IMM: opb_mux_out = `RV32_signext_Iimm(id_ex_packet_in.inst);
 			OPB_IS_S_IMM: opb_mux_out = `RV32_signext_Simm(id_ex_packet_in.inst);
 			OPB_IS_B_IMM: opb_mux_out = `RV32_signext_Bimm(id_ex_packet_in.inst);
