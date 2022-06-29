@@ -149,8 +149,7 @@ module pipeline (
 		.clock (clock),
 		.reset (reset),
 		// .mem_wb_valid_inst(mem_wb_valid_inst),
-		.if_id_ra_fwd_type(id_ex_packet.ra_fwd_type),
-		.if_id_rb_fwd_type(id_ex_packet.rb_fwd_type),
+		.load_use_stall(id_ex_packet.load_use_stall),
 		.ex_mem_take_branch(ex_mem_packet.take_branch),
 		.ex_mem_target_pc(ex_mem_packet.alu_result),
 		.Imem2proc_data(mem2proc_data),
@@ -221,7 +220,7 @@ module pipeline (
 	assign id_ex_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset) begin
+		if (reset | id_packet.load_use_stall) begin
 			id_ex_packet <= `SD '{{`XLEN{1'b0}},
 				{`XLEN{1'b0}}, 
 				{`XLEN{1'b0}}, 

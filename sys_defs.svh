@@ -266,6 +266,8 @@ typedef struct packed {
 	logic [2:0] ra_fwd_type;
 	logic [2:0] rb_fwd_type;
 
+	logic load_use_stall;
+
 	logic [`XLEN-1:0] NPC;   // PC + 4
 	logic [`XLEN-1:0] PC;    // PC
 

@@ -370,5 +370,7 @@ module id_stage(
 		.ra_fwd_out(id_packet_out.ra_fwd_type),
 		.rb_fwd_out(id_packet_out.rb_fwd_type)
 	);
+
+	assign id_packet_out.load_use_stall = (id_packet_out.ra_fwd_type == D3) | (id_packet_out.ra_fwd_type == D3);    // load use hazard or not
    
 endmodule // module id_stage
