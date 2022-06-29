@@ -172,7 +172,7 @@ module pipeline (
 	assign if_id_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset) begin 
+		if (reset || ex_mem_packet.take_branch) begin 
 			if_id_packet.inst  <= `SD `NOP;
 			if_id_packet.valid <= `SD `FALSE;
             if_id_packet.NPC   <= `SD 0;
@@ -220,7 +220,7 @@ module pipeline (
 	assign id_ex_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset | id_packet.load_use_stall) begin
+		if (reset || id_packet.load_use_stall || ex_mem_packet.take_branch) begin
 			id_ex_packet <= `SD '{{`XLEN{1'b0}},
 				{`XLEN{1'b0}}, 
 				{`XLEN{1'b0}}, 
@@ -276,7 +276,7 @@ module pipeline (
 	assign ex_mem_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset) begin
+		if (reset || ex_mem_packet.take_branch) begin
 			ex_mem_IR     <= `SD `NOP;
 			ex_mem_packet <= `SD 0;
 		end else begin

@@ -99,6 +99,7 @@ endmodule // brcond
 module ex_stage(
 	input clock,               // system clock
 	input reset,               // system reset
+	// input br_taken_flush,	   
 	input fwd_ex_result,	   // forward result from EX stage
 	input fwd_mem_result,      // forward result from MEM stage   
 	input ID_EX_PACKET   id_ex_packet_in,
