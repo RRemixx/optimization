@@ -59,6 +59,8 @@ module if_stage(
 			PC_reg <= `SD 0;       // initial PC value is 0
 		else if(PC_enable)
 			PC_reg <= `SD next_PC; // transition to next PC
+		else 
+			PC_reg <= `SD PC_reg;
 	end  // always
 	
 	// This FF controls the stall signal that artificially forces
