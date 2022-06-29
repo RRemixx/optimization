@@ -220,42 +220,83 @@ module decoder(
 endmodule // decoder
 
 
-module detector(
-	input clock,
-	input [4:0] rda_idx,
-	input [4:0] rdb_idx,
-	input [4:0] dest_idx,
+module hazard_comparator(
+	input DETECTOR_PACKET ex_dp,
+	input DETECTOR_PACKET me_dp,
+	input DETECTOR_PACKET wb_dp,
+	input [4:0] ra_idx,
 
-	output logic [4:0] fwd_out
+	output logic [2:0] fwd_out
 );
 
-	logic [4:0] ex_stage_rd_idx;
-	logic [4:0] me_stage_rd_idx;
-	logic [4:0] wb_stage_rd_idx;
-	logic detect_finished;
-
-	localparam [4:0] D1 = 4'd0;
-	localparam [4:0] D2 = 4'd1;
-	localparam [4:0] L1 = 4'd2;
-	localparam [4:0] L2 = 4'd2;
-	localparam [4:0] C1 = 4'd2;
-	localparam [4:0] M1 = 4'd3;
-	localparam [4:0] NH = 4'd4;  // no hazard
-
-	wire ld_fwd_out;
-	assign ld_fwd_out = (detect_finished == 1'b0);
-
-	wire [4:0] fwd_out_wire;
-	assign fwd_out_wire = (dest_idx == ex_stage_rd_idx) ? D1
-
+	localparam [2:0] NH = 3'd0;  	// no hazard
+	localparam [2:0] D1 = 3'd1;     // forward from mem
+	localparam [2:0] D2 = 3'd2;		// forward from wb
+	localparam [2:0] D3 = 3'd3;     // load and use
+	localparam [2:0] C1 = 3'd4;		// control
+	localparam [2:0] M1 = 3'd5;     // memory 
 
 	always_comb begin
-		if (!detect_finished) begin
-			if (dest_idx == ex_stage_rd_idx)
-
+		if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
+			fwd_out = D1;
+		end 
+		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
+			fwd_out = D2;
 		end
-		else 
+		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
+			fwd_out = D3;
+		end
+		else begin
+			fwd_out = NH;
+		end
 	end
+
+endmodule
+
+module detector(
+	input reset,
+	input clock,
+	input illegal,
+	input is_load,
+	input [4:0] ra_idx,
+	input [4:0] rb_idx,
+	input [4:0] dest_idx,
+
+	output logic [4:0] ra_fwd_out,
+	output logic [4:0] rb_fwd_out
+);
+
+	DETECTOR_PACKET ex_dp;     	// id/ex 
+	DETECTOR_PACKET me_dp;		// ex/me
+	DETECTOR_PACKET wb_dp;		// me/wb
+
+	always_ff begin
+		if (reset) begin
+			ex_dp.dest_reg_idx <= `ZERO_REG;
+			ex_dp.inst_is_load <= 1'b0;
+			me_dp.dest_reg_idx <= `ZERO_REG;
+			me_dp.inst_is_load <= 1'b0;
+			wb_dp.dest_reg_idx <= `ZERO_REG;
+			wb_dp.inst_is_load <= 1'b0;
+		end
+		else if (illegal) begin
+			wb_dp = me_dp;
+			me_dp = ex_dp;
+			ex_dp.dest_reg_idx = `ZERO_REG;
+			ex_dp.inst_is_load = 1'b0;
+		end
+		else begin
+			wb_dp = me_dp;
+			me_dp = ex_dp;
+			ex_dp.inst_is_load = is_load;
+			ex_dp.dest_reg_idx = dest_idx;
+		end
+	end
+
+	// ra
+	hazard_comparator hc_ra (ex_dp, me_dp, wb_dp, ra_idx, ra_fwd_out);
+	// rb
+	hazard_comparator hc_rb (ex_dp, me_dp, wb_dp, rb_idx, rb_fwd_out);
 	
 endmodule
 
@@ -317,5 +358,18 @@ module id_stage(
 			default:    id_packet_out.dest_reg_idx = `ZERO_REG; 
 		endcase
 	end
+
+	// hazard detector
+	detector detector_0 (
+		.reset(reset),
+		.clock(clock),
+		.illegal(id_packet_out.illegal),
+		.is_load(id_packet_out.rd_mem),
+		.ra_idx(if_id_packet_in.inst.r.rs1),
+		.rb_idx(if_id_packet_in.inst.r.rs2),
+		.dest_idx(id_packet_out.dest_reg_idx),
+		.ra_fwd_out(ra_fwd_type),
+		.rb_fwd_out(rb_fwd_type)
+	);
    
 endmodule // module id_stage
