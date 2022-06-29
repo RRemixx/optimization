@@ -300,7 +300,6 @@ module detector(
 	
 endmodule
 
-
 module id_stage(         
 	input         clock,              // system clock
 	input         reset,              // system reset
@@ -368,8 +367,8 @@ module id_stage(
 		.ra_idx(if_id_packet_in.inst.r.rs1),
 		.rb_idx(if_id_packet_in.inst.r.rs2),
 		.dest_idx(id_packet_out.dest_reg_idx),
-		.ra_fwd_out(ra_fwd_type),
-		.rb_fwd_out(rb_fwd_type)
+		.ra_fwd_out(id_packet_out.ra_fwd_type),
+		.rb_fwd_out(id_packet_out.rb_fwd_type)
 	);
    
 endmodule // module id_stage

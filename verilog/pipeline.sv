@@ -148,7 +148,9 @@ module pipeline (
 		// Inputs
 		.clock (clock),
 		.reset (reset),
-		.mem_wb_valid_inst(mem_wb_valid_inst),
+		// .mem_wb_valid_inst(mem_wb_valid_inst),
+		.if_id_ra_fwd_type(id_ex_packet.ra_fwd_type),
+		.if_id_rb_fwd_type(id_ex_packet.rb_fwd_type),
 		.ex_mem_take_branch(ex_mem_packet.take_branch),
 		.ex_mem_target_pc(ex_mem_packet.alu_result),
 		.Imem2proc_data(mem2proc_data),
@@ -180,6 +182,9 @@ module pipeline (
 			if (if_id_enable) begin
 				if_id_packet <= `SD if_packet; 
 			end // if (if_id_enable)	
+			else begin
+				if_id_packet <= `SD if_id_packet;
+			end
 		end
 	end // always
 
