@@ -6,21 +6,13 @@ Disassembly of section .text:
 
 00000000 <.text>:
    0:	00100093          	addi	x1,x0,1
-   4:	00000013          	addi	x0,x0,0
-   8:	00000013          	addi	x0,x0,0
-   c:	00000013          	addi	x0,x0,0
-  10:	00000013          	addi	x0,x0,0
-  14:	00200113          	addi	x2,x0,2
-  18:	00000013          	addi	x0,x0,0
-  1c:	00000013          	addi	x0,x0,0
-  20:	00000013          	addi	x0,x0,0
-  24:	00000013          	addi	x0,x0,0
-  28:	001101b3          	add	x3,x2,x1
-  2c:	00218233          	add	x4,x3,x2
-  30:	003202b3          	add	x5,x4,x3
-  34:	00428333          	add	x6,x5,x4
-  38:	005303b3          	add	x7,x6,x5
-  3c:	10500073          	wfi
+   4:	00200113          	addi	x2,x0,2
+   8:	001101b3          	add	x3,x2,x1
+   c:	00218233          	add	x4,x3,x2
+  10:	00412023          	sw	x4,0(x2)
+  14:	00012283          	lw	x5,0(x2)
+  18:	00028333          	add	x6,x5,x0
+  1c:	10500073          	wfi
 	...
 
 Disassembly of section .riscv.attributes:
@@ -30,7 +22,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	.2byte	0x0
    4:	7200                	.2byte	0x7200
    6:	7369                	.2byte	0x7369
-   8:	01007663          	bgeu	x0,x16,14 <_ebss-0x6c>
+   8:	01007663          	bgeu	x0,x16,14 <_ebss-0x4c>
    c:	0018                	.2byte	0x18
    e:	0000                	.2byte	0x0
   10:	7205                	.2byte	0x7205

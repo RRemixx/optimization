@@ -225,12 +225,19 @@ module hazard_comparator(
 	input DETECTOR_PACKET me_dp,
 	input DETECTOR_PACKET wb_dp,
 	input [4:0] ra_idx,
+	input inst_sw,    // if inst is sw
 
 	output FWD_SELECT fwd_out
 );
 
 	always_comb begin
-		if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
+		if (inst_sw && ex_dp.dest_reg_idx != 0 && ra_idx == ex_dp.dest_reg_idx) begin
+			fwd_out = FWD_S1;
+		end
+		else if (inst_sw && me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
+			fwd_out = FWD_S2;
+		end
+		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_D1;
 		end 
 		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
@@ -252,6 +259,7 @@ module detector(
 	input br_taken,
 	input illegal,
 	input is_load,
+	input is_store,
 	input [4:0] ra_idx,
 	input [4:0] rb_idx,
 	input [4:0] dest_idx,
@@ -288,9 +296,9 @@ module detector(
 	end
 
 	// ra
-	hazard_comparator hc_ra (ex_dp, me_dp, wb_dp, ra_idx, ra_fwd_out);
+	hazard_comparator hc_ra (ex_dp, me_dp, wb_dp, ra_idx, is_store, ra_fwd_out);
 	// rb
-	hazard_comparator hc_rb (ex_dp, me_dp, wb_dp, rb_idx, rb_fwd_out);
+	hazard_comparator hc_rb (ex_dp, me_dp, wb_dp, rb_idx, is_store, rb_fwd_out);
 	
 endmodule
 
@@ -360,6 +368,7 @@ module id_stage(
 		.br_taken(br_taken),
 		.illegal(id_packet_out.illegal),
 		.is_load(id_packet_out.rd_mem),
+		.is_store(id_packet_out.wr_mem),
 		.ra_idx(if_id_packet_in.inst.r.rs1),
 		.rb_idx(if_id_packet_in.inst.r.rs2),
 		.dest_idx(id_packet_out.dest_reg_idx),

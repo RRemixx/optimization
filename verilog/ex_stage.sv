@@ -107,7 +107,12 @@ module ex_stage(
 );
 	// Pass-throughs
 	assign ex_packet_out.NPC = id_ex_packet_in.NPC;
-	assign ex_packet_out.rs2_value = id_ex_packet_in.rs2_value;
+	
+	// sw forward datapath
+	assign ex_packet_out.rs2_value = (id_ex_packet_in.rb_fwd_type == FWD_S1) ? fwd_ex_result  : 
+									 (id_ex_packet_in.rb_fwd_type == FWD_S1) ? fwd_mem_result :
+									 id_ex_packet_in.rs2_value;
+
 	assign ex_packet_out.rd_mem = id_ex_packet_in.rd_mem;
 	assign ex_packet_out.wr_mem = id_ex_packet_in.wr_mem;
 	assign ex_packet_out.dest_reg_idx = id_ex_packet_in.dest_reg_idx;
@@ -167,8 +172,9 @@ module ex_stage(
 			OPB_IS_U_IMM: opb_mux_out = `RV32_signext_Uimm(id_ex_packet_in.inst);
 			OPB_IS_J_IMM: opb_mux_out = `RV32_signext_Jimm(id_ex_packet_in.inst);
 		endcase 
+		$display("opb_select is %d, opa is %d, opb is %d, fwd type of ra is %d, fwd type of rb is %d", id_ex_packet_in.opb_select, opa_mux_out, opb_mux_out, id_ex_packet_in.ra_fwd_type, id_ex_packet_in.rb_fwd_type);
+		$display("ra is %d, rb is %d", id_ex_packet_in.rs1_value, id_ex_packet_in.rs2_value);
 	end
-
 	//
 	// instantiate the ALU
 	//
