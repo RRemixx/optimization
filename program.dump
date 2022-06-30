@@ -8,22 +8,23 @@ Disassembly of section .text:
    0:	00100093          	addi	ra,zero,1
    4:	00200113          	addi	sp,zero,2
    8:	001101b3          	add	gp,sp,ra
-   c:	00218233          	add	tp,gp,sp
-  10:	00412023          	sw	tp,0(sp)
-  14:	00012283          	lw	t0,0(sp)
-  18:	00128333          	add	t1,t0,ra
-  1c:	10500073          	wfi
+   c:	00312023          	sw	gp,0(sp)
+  10:	002100b3          	add	ra,sp,sp
+  14:	00108133          	add	sp,ra,ra
+  18:	00208233          	add	tp,ra,sp
+  1c:	001202b3          	add	t0,tp,ra
+  20:	002100b3          	add	ra,sp,sp
 	...
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	2241                	.2byte	0x2241
+   0:	1e41                	.2byte	0x1e41
    2:	0000                	.2byte	0x0
    4:	7200                	.2byte	0x7200
    6:	7369                	.2byte	0x7369
-   8:	01007663          	bgeu	zero,a6,14 <_ebss-0x4c>
-   c:	0018                	.2byte	0x18
+   8:	01007663          	bgeu	zero,a6,14 <_ebss-0x6c>
+   c:	0014                	.2byte	0x14
    e:	0000                	.2byte	0x0
   10:	7205                	.2byte	0x7205
   12:	3376                	.2byte	0x3376
@@ -32,7 +33,4 @@ Disassembly of section .riscv.attributes:
   18:	5f30                	.2byte	0x5f30
   1a:	326d                	.2byte	0x326d
   1c:	3070                	.2byte	0x3070
-  1e:	0800                	.2byte	0x800
-  20:	0a01                	.2byte	0xa01
-  22:	0b              	Address 0x0000000000000022 is out of bounds.
-
+	...

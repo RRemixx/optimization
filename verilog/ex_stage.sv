@@ -121,6 +121,7 @@ module ex_stage(
 	assign ex_packet_out.csr_op = id_ex_packet_in.csr_op;
 	assign ex_packet_out.valid = id_ex_packet_in.valid;
 	assign ex_packet_out.mem_size = id_ex_packet_in.inst.r.funct3;
+	assign ex_packet_out.mem_use_by_mem = ex_packet_out.valid & (ex_packet_out.rd_mem | ex_packet_out.wr_mem);
 
 	logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
 	logic brcond_result;

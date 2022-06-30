@@ -150,9 +150,7 @@ module pipeline (
 		.reset (reset),
 		
 		// structural hazard
-		.ex_mem_inst_valid(ex_mem_packet.valid),
-		.ex_mem_wr_mem(ex_mem_packet.wr_mem),
-		.ex_mem_rd_mem(ex_mem_packet.rd_mem),
+		.mem_use_by_mem(ex_mem_packet.mem_use_by_mem),
 
 		.load_use_stall(id_packet.load_use_stall),
 		.ex_mem_take_branch(ex_mem_packet.take_branch),
@@ -177,7 +175,7 @@ module pipeline (
 	assign if_id_enable = !id_packet.load_use_stall; // if stall, disable write if/id
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset || ex_mem_packet.take_branch) begin 
+		if (reset || ex_mem_packet.take_branch || ex_mem_packet.mem_use_by_mem) begin 
 			if_id_packet.inst  <= `SD `NOP;
 			if_id_packet.valid <= `SD `FALSE;
             if_id_packet.NPC   <= `SD 0;

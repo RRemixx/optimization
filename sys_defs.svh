@@ -304,6 +304,8 @@ typedef struct packed {
 } ID_EX_PACKET;
 
 typedef struct packed {
+	logic mem_use_by_mem;  // stall if stage if true
+
 	logic [`XLEN-1:0] alu_result; // alu_result
 	logic [`XLEN-1:0] NPC; //pc + 4
 	logic             take_branch; // is this a taken branch?

@@ -16,11 +16,9 @@ module if_stage(
 	input         reset,                  // system reset
 	// input         mem_wb_valid_inst,      // only go to next instruction when true
 
-	// structural hazard
-	input ex_mem_inst_valid,
-	input ex_mem_wr_mem,
-	input ex_mem_rd_mem,
-	                                      // makes pipeline behave as single-cycle
+						
+	input mem_use_by_mem,				  // structural hazard
+	                                
 	input  load_use_stall,                 // enable load and use stall or not
 	input         ex_mem_take_branch,      // taken-branch signal
 	input  [`XLEN-1:0] ex_mem_target_pc,        // target pc: use if take_branch is TRUE
@@ -39,8 +37,6 @@ module if_stage(
 	logic    [`XLEN-1:0] next_PC;
 	logic           PC_enable;
 
-	assign mem_used_by_mem = ex_mem_inst_valid & (ex_mem_wr_mem | ex_mem_rd_mem);
-
 	// assign stall_enable = (if_id_ra_fwd_type == 3'd3) | (if_id_rb_fwd_type == 3'd3);
 	
 	assign proc2Imem_addr = {PC_reg[`XLEN-1:3], 3'b0};
@@ -57,7 +53,8 @@ module if_stage(
 	assign next_PC = ex_mem_take_branch ? ex_mem_target_pc : PC_plus_4;
 	
 	// The take-branch signal must override stalling (otherwise it may be lost)
-	assign PC_enable = if_packet_out.valid | ex_mem_take_branch;
+	assign PC_enable = ex_mem_take_branch ? 1'b1 : 
+					   (load_use_stall | mem_use_by_mem) ? 1'b0 : 1'b1;
 	
 	// Pass PC+4 down pipeline w/instruction
 	assign if_packet_out.NPC = PC_plus_4;
