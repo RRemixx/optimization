@@ -80,7 +80,7 @@ module if_stage(
 	always_ff @(posedge clock) begin
 		if (reset)
 			if_packet_out.valid <= `SD 1;  // must start with something
-		else if (stall_enable)
+		else if (load_use_stall)
 			if_packet_out.valid <= `SD 0;  // stall (load use)
 		else
 			if_packet_out.valid <= `SD 1;

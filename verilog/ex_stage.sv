@@ -100,8 +100,8 @@ module ex_stage(
 	input clock,               // system clock
 	input reset,               // system reset
 	// input br_taken_flush,	   
-	input fwd_ex_result,	   // forward result from EX stage
-	input fwd_mem_result,      // forward result from MEM stage   
+	input [`XLEN-1:0] fwd_ex_result,	   // forward result from EX stage
+	input [`XLEN-1:0] fwd_mem_result,      // forward result from MEM stage   
 	input ID_EX_PACKET   id_ex_packet_in,
 	output EX_MEM_PACKET ex_packet_out
 );
@@ -127,11 +127,16 @@ module ex_stage(
 		case (id_ex_packet_in.opa_select)
 			OPA_IS_RS1:  begin
 				case (id_ex_packet_in.ra_fwd_type)
-					FWD_NH : opa_mux_out = id_ex_packet_in.rs1_value;
-					FWD_D1 : opa_mux_out = fwd_ex_result;
+					FWD_NH : begin
+						opa_mux_out = id_ex_packet_in.rs1_value;
+					end
+					FWD_D1 : begin
+						opa_mux_out = fwd_ex_result;
+					end
 					FWD_D2 : opa_mux_out = fwd_mem_result;
 					FWD_D3 : opa_mux_out = fwd_mem_result;
 					default : opa_mux_out = id_ex_packet_in.rs1_value;
+				endcase
 			end
 			OPA_IS_NPC:  opa_mux_out = id_ex_packet_in.NPC;
 			OPA_IS_PC:   opa_mux_out = id_ex_packet_in.PC;
@@ -148,12 +153,13 @@ module ex_stage(
 		opb_mux_out = `XLEN'hfacefeed;
 		case (id_ex_packet_in.opb_select)
 			OPB_IS_RS2:  begin
-				case (id_ex_packet_in.ra_fwd_type)
+				case (id_ex_packet_in.rb_fwd_type)
 					FWD_NH : opb_mux_out = id_ex_packet_in.rs2_value;
 					FWD_D1 : opb_mux_out = fwd_ex_result;
 					FWD_D2 : opb_mux_out = fwd_mem_result;
 					FWD_D3 : opb_mux_out = fwd_mem_result;
 					default : opb_mux_out = id_ex_packet_in.rs2_value;
+				endcase
 			end
 			OPB_IS_I_IMM: opb_mux_out = `RV32_signext_Iimm(id_ex_packet_in.inst);
 			OPB_IS_S_IMM: opb_mux_out = `RV32_signext_Simm(id_ex_packet_in.inst);

@@ -202,6 +202,7 @@ module pipeline (
 	id_stage id_stage_0 (// Inputs
 		.clock(clock),
 		.reset(reset),
+		.br_taken(ex_mem_packet.take_branch),
 		.if_id_packet_in(if_id_packet),
 		.wb_reg_wr_en_out   (wb_reg_wr_en_out),
 		.wb_reg_wr_idx_out  (wb_reg_wr_idx_out),
@@ -226,7 +227,11 @@ module pipeline (
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset || id_packet.load_use_stall || ex_mem_packet.take_branch) begin
-			id_ex_packet <= `SD '{{`XLEN{1'b0}},
+			id_ex_packet <= `SD '{
+			    FWD_NH,
+			    FWD_NH,
+			    1'b0,
+			    {`XLEN{1'b0}},
 				{`XLEN{1'b0}}, 
 				{`XLEN{1'b0}}, 
 				{`XLEN{1'b0}}, 
@@ -249,6 +254,7 @@ module pipeline (
 				id_ex_packet <= `SD id_packet;
 			end // if
 		end // else: !if(reset)
+		// $display("ra_fwd_type is %b rb_fwd_type is %b", id_ex_packet.ra_fwd_type, id_ex_packet.rb_fwd_type);
 	end // always
 
 
@@ -262,7 +268,7 @@ module pipeline (
 		.clock(clock),
 		.reset(reset),
 		.fwd_ex_result(ex_mem_packet.alu_result),
-		.fwd_mem_result(mem_result_out),
+		.fwd_mem_result(mem_wb_result),
 		.id_ex_packet_in(id_ex_packet),
 		// Outputs
 		.ex_packet_out(ex_packet)
@@ -281,6 +287,8 @@ module pipeline (
 	assign ex_mem_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
+		// $display("alu_result_ex_mem is %d", ex_mem_packet.alu_result);
+		// $display("alu_result_ex is %d", ex_packet.alu_result);
 		if (reset || ex_mem_packet.take_branch) begin
 			ex_mem_IR     <= `SD `NOP;
 			ex_mem_packet <= `SD 0;

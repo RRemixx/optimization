@@ -226,7 +226,7 @@ module hazard_comparator(
 	input DETECTOR_PACKET wb_dp,
 	input [4:0] ra_idx,
 
-	FWD_SELECT fwd_out
+	output FWD_SELECT fwd_out
 );
 
 	always_comb begin
@@ -249,40 +249,41 @@ endmodule
 module detector(
 	input reset,
 	input clock,
+	input br_taken,
 	input illegal,
 	input is_load,
 	input [4:0] ra_idx,
 	input [4:0] rb_idx,
 	input [4:0] dest_idx,
 
-	output logic [4:0] ra_fwd_out,
-	output logic [4:0] rb_fwd_out
+	output FWD_SELECT ra_fwd_out,
+	output FWD_SELECT rb_fwd_out
 );
 
 	DETECTOR_PACKET ex_dp;     	// id/ex 
 	DETECTOR_PACKET me_dp;		// ex/me
 	DETECTOR_PACKET wb_dp;		// me/wb
 
-	always_ff begin
-		if (reset) begin
-			ex_dp.dest_reg_idx <= `ZERO_REG;
-			ex_dp.inst_is_load <= 1'b0;
-			me_dp.dest_reg_idx <= `ZERO_REG;
-			me_dp.inst_is_load <= 1'b0;
-			wb_dp.dest_reg_idx <= `ZERO_REG;
-			wb_dp.inst_is_load <= 1'b0;
+	always_ff @(posedge clock) begin
+		if (reset || br_taken) begin
+			ex_dp.dest_reg_idx <= `SD `ZERO_REG;
+			ex_dp.inst_is_load <= `SD 1'b0;
+			me_dp.dest_reg_idx <= `SD `ZERO_REG;
+			me_dp.inst_is_load <= `SD 1'b0;
+			wb_dp.dest_reg_idx <= `SD `ZERO_REG;
+			wb_dp.inst_is_load <= `SD 1'b0;
 		end
 		else if (illegal) begin
-			wb_dp = me_dp;
-			me_dp = ex_dp;
-			ex_dp.dest_reg_idx = `ZERO_REG;
-			ex_dp.inst_is_load = 1'b0;
+			wb_dp              <= `SD me_dp;
+			me_dp              <= `SD ex_dp;
+			ex_dp.dest_reg_idx <= `SD `ZERO_REG;
+			ex_dp.inst_is_load <= `SD 1'b0;
 		end
 		else begin
-			wb_dp = me_dp;
-			me_dp = ex_dp;
-			ex_dp.inst_is_load = is_load;
-			ex_dp.dest_reg_idx = dest_idx;
+			wb_dp              <= `SD me_dp;
+			me_dp              <= `SD ex_dp;
+			ex_dp.inst_is_load <= `SD is_load;
+			ex_dp.dest_reg_idx <= `SD dest_idx;
 		end
 	end
 
@@ -296,6 +297,7 @@ endmodule
 module id_stage(         
 	input         clock,              // system clock
 	input         reset,              // system reset
+	input         br_taken,
 	input         wb_reg_wr_en_out,    // Reg write enable from WB Stage
 	input  [4:0] wb_reg_wr_idx_out,  // Reg write index from WB Stage
 	input  [`XLEN-1:0] wb_reg_wr_data_out,  // Reg write data from WB Stage
@@ -355,6 +357,7 @@ module id_stage(
 	detector detector_0 (
 		.reset(reset),
 		.clock(clock),
+		.br_taken(br_taken),
 		.illegal(id_packet_out.illegal),
 		.is_load(id_packet_out.rd_mem),
 		.ra_idx(if_id_packet_in.inst.r.rs1),

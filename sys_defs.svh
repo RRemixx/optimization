@@ -69,23 +69,23 @@ typedef enum logic [3:0] {
 // forwared to ALU opA/B mux selects
 // 
 typedef enum logic [2:0] {
-	FWD_NH = 3'h0;  	// no hazard
-	FWD_D1 = 3'h1;     	// forward from mem
-	FWD_D2 = 3'h2;		// forward from wb
-	FWD_D3 = 3'h3;     	// load and use
-	FWD_C1 = 3'h4;		// control
-	FWD_M1 = 3'h5;     	// memory 
-} FWD_SELECT
+	FWD_NH = 3'h0,  	// no hazard
+	FWD_D1 = 3'h1,     	// forward from mem
+	FWD_D2 = 3'h2,		// forward from wb
+	FWD_D3 = 3'h3,     	// load and use
+	FWD_C1 = 3'h4,		// control
+	FWD_M1 = 3'h5     	// memory 
+} FWD_SELECT;
 
 
 //
 // ALU opA input mux selects
 //
 typedef enum logic [1:0] {
-	OPA_IS_RS1  = 3'h0,
-	OPA_IS_NPC  = 3'h1,
-	OPA_IS_PC   = 3'h2,
-	OPA_IS_ZERO = 3'h3
+	OPA_IS_RS1  = 2'h0,
+	OPA_IS_NPC  = 2'h1,
+	OPA_IS_PC   = 2'h2,
+	OPA_IS_ZERO = 2'h3
 } ALU_OPA_SELECT;
 
 //
