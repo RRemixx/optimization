@@ -30,7 +30,7 @@ module if_stage(
 );
 
 	// structural hazard
-	logic structural_hazard;
+	logic mem_used_by_mem;
 
 
 	logic    [`XLEN-1:0] PC_reg;             // PC we are currently fetching
@@ -39,7 +39,7 @@ module if_stage(
 	logic    [`XLEN-1:0] next_PC;
 	logic           PC_enable;
 
-	assign structural_hazard = ex_mem_inst_valid & (ex_mem_wr_mem | ex_mem_rd_mem);
+	assign mem_used_by_mem = ex_mem_inst_valid & (ex_mem_wr_mem | ex_mem_rd_mem);
 
 	// assign stall_enable = (if_id_ra_fwd_type == 3'd3) | (if_id_rb_fwd_type == 3'd3);
 	
