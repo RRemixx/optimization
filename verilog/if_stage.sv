@@ -15,6 +15,11 @@ module if_stage(
 	input         clock,                  // system clock
 	input         reset,                  // system reset
 	// input         mem_wb_valid_inst,      // only go to next instruction when true
+
+	// structural hazard
+	input ex_mem_inst_valid,
+	input ex_mem_wr_mem,
+	input ex_mem_rd_mem,
 	                                      // makes pipeline behave as single-cycle
 	input  load_use_stall,                 // enable load and use stall or not
 	input         ex_mem_take_branch,      // taken-branch signal
@@ -24,12 +29,17 @@ module if_stage(
 	output IF_ID_PACKET if_packet_out         // Output data packet from IF going to ID, see sys_defs for signal information 
 );
 
+	// structural hazard
+	logic structural_hazard;
+
 
 	logic    [`XLEN-1:0] PC_reg;             // PC we are currently fetching
 	
 	logic    [`XLEN-1:0] PC_plus_4;
 	logic    [`XLEN-1:0] next_PC;
 	logic           PC_enable;
+
+	assign structural_hazard = ex_mem_inst_valid & (ex_mem_wr_mem | ex_mem_rd_mem);
 
 	// assign stall_enable = (if_id_ra_fwd_type == 3'd3) | (if_id_rb_fwd_type == 3'd3);
 	

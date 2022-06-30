@@ -148,7 +148,12 @@ module pipeline (
 		// Inputs
 		.clock (clock),
 		.reset (reset),
-		// .mem_wb_valid_inst(mem_wb_valid_inst),
+		
+		// structural hazard
+		.ex_mem_inst_valid(ex_mem_packet.valid),
+		.ex_mem_wr_mem(ex_mem_packet.wr_mem),
+		.ex_mem_rd_mem(ex_mem_packet.rd_mem),
+
 		.load_use_stall(id_ex_packet.load_use_stall),
 		.ex_mem_take_branch(ex_mem_packet.take_branch),
 		.ex_mem_target_pc(ex_mem_packet.alu_result),
