@@ -154,7 +154,7 @@ module pipeline (
 		.ex_mem_wr_mem(ex_mem_packet.wr_mem),
 		.ex_mem_rd_mem(ex_mem_packet.rd_mem),
 
-		.load_use_stall(id_ex_packet.load_use_stall),
+		.load_use_stall(id_packet.load_use_stall),
 		.ex_mem_take_branch(ex_mem_packet.take_branch),
 		.ex_mem_target_pc(ex_mem_packet.alu_result),
 		.Imem2proc_data(mem2proc_data),
@@ -174,7 +174,7 @@ module pipeline (
 	assign if_id_NPC        = if_id_packet.NPC;
 	assign if_id_IR         = if_id_packet.inst;
 	assign if_id_valid_inst = if_id_packet.valid;
-	assign if_id_enable = 1'b1; // always enabled
+	assign if_id_enable = !id_packet.load_use_stall; // if stall, disable write if/id
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset || ex_mem_packet.take_branch) begin 
@@ -226,7 +226,7 @@ module pipeline (
 	assign id_ex_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset || id_packet.load_use_stall || ex_mem_packet.take_branch) begin
+		if (reset || ex_mem_packet.take_branch) begin
 			id_ex_packet <= `SD '{
 			    FWD_NH,
 			    FWD_NH,
@@ -249,7 +249,32 @@ module pipeline (
 				1'b0, //csr_op
 				1'b0 //valid
 			}; 
-		end else begin // if (reset)
+		end 
+		else if (id_packet.load_use_stall) begin // if (load and use stall)
+			id_ex_packet <= `SD '{
+			    FWD_NH,
+			    FWD_NH,
+			    1'b1,
+			    {`XLEN{1'b0}},
+				{`XLEN{1'b0}}, 
+				{`XLEN{1'b0}}, 
+				{`XLEN{1'b0}}, 
+				OPA_IS_RS1, 
+				OPB_IS_RS2, 
+				`NOP,
+				`ZERO_REG,
+				ALU_ADD, 
+				1'b0, //rd_mem
+				1'b0, //wr_mem
+				1'b0, //cond
+				1'b0, //uncond
+				1'b0, //halt
+				1'b0, //illegal
+				1'b0, //csr_op
+				1'b0 //valid
+			}; 
+		end
+		else begin // if (reset)
 			if (id_ex_enable) begin
 				id_ex_packet <= `SD id_packet;
 			end // if

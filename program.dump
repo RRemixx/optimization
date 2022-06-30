@@ -11,7 +11,7 @@ Disassembly of section .text:
    c:	00218233          	add	tp,gp,sp
   10:	00412023          	sw	tp,0(sp)
   14:	00012283          	lw	t0,0(sp)
-  18:	00028333          	add	t1,t0,zero
+  18:	00128333          	add	t1,t0,ra
   1c:	10500073          	wfi
 	...
 

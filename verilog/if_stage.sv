@@ -57,7 +57,7 @@ module if_stage(
 	assign next_PC = ex_mem_take_branch ? ex_mem_target_pc : PC_plus_4;
 	
 	// The take-branch signal must override stalling (otherwise it may be lost)
-	assign PC_enable = (if_packet_out.valid | ex_mem_take_branch) & !load_use_stall;
+	assign PC_enable = if_packet_out.valid | ex_mem_take_branch;
 	
 	// Pass PC+4 down pipeline w/instruction
 	assign if_packet_out.NPC = PC_plus_4;
@@ -73,17 +73,19 @@ module if_stage(
 			PC_reg <= `SD PC_reg;
 	end  // always
 	
+
+	assign if_packet_out.valid = 1;
 	// This FF controls the stall signal that artificially forces
 	// fetch to stall until the previous instruction has completed
 	// This must be removed for Project 3
 	// synopsys sync_set_reset "reset"
-	always_ff @(posedge clock) begin
-		if (reset)
-			if_packet_out.valid <= `SD 1;  // must start with something
-		else if (load_use_stall)
-			if_packet_out.valid <= `SD 0;  // stall (load use)
-		else
-			if_packet_out.valid <= `SD 1;
-	end
+	// always_ff @(posedge clock) begin
+	// 	if (reset)
+	// 		if_packet_out.valid <= `SD 1;  // must start with something
+	// 	else if (load_use_stall)
+	// 		if_packet_out.valid <= `SD 0;  // stall (load use)
+	// 	else
+	// 		if_packet_out.valid <= `SD 1;
+	// end
 
 endmodule  // module if_stage

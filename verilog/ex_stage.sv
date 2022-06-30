@@ -172,8 +172,8 @@ module ex_stage(
 			OPB_IS_U_IMM: opb_mux_out = `RV32_signext_Uimm(id_ex_packet_in.inst);
 			OPB_IS_J_IMM: opb_mux_out = `RV32_signext_Jimm(id_ex_packet_in.inst);
 		endcase 
-		$display("opb_select is %d, opa is %d, opb is %d, fwd type of ra is %d, fwd type of rb is %d", id_ex_packet_in.opb_select, opa_mux_out, opb_mux_out, id_ex_packet_in.ra_fwd_type, id_ex_packet_in.rb_fwd_type);
-		$display("ra is %d, rb is %d", id_ex_packet_in.rs1_value, id_ex_packet_in.rs2_value);
+		// $display("opb_select is %d, opa is %d, opb is %d, fwd type of ra is %d, fwd type of rb is %d", id_ex_packet_in.opb_select, opa_mux_out, opb_mux_out, id_ex_packet_in.ra_fwd_type, id_ex_packet_in.rb_fwd_type);
+		// $display("ra is %d, rb is %d", id_ex_packet_in.rs1_value, id_ex_packet_in.rs2_value);
 	end
 	//
 	// instantiate the ALU

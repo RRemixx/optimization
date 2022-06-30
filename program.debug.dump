@@ -11,7 +11,7 @@ Disassembly of section .text:
    c:	00218233          	add	x4,x3,x2
   10:	00412023          	sw	x4,0(x2)
   14:	00012283          	lw	x5,0(x2)
-  18:	00028333          	add	x6,x5,x0
+  18:	00128333          	add	x6,x5,x1
   1c:	10500073          	wfi
 	...
 
