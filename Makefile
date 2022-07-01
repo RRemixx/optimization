@@ -2,7 +2,7 @@
 # make assembly - Build the memory file for an assembly source
 # make program - Build the memory file for a C program
 
-SOURCE = test_progs/bfs.c
+SOURCE = test_progs/alexnet.c
 
 CRT = crt.s
 LINKERS = linker.lds

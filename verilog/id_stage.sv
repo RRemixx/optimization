@@ -235,11 +235,11 @@ module hazard_comparator_ra(
 		if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_D1;
 		end 
-		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
-			fwd_out = FWD_D2;
-		end
 		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_D3;
+		end
+		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
+			fwd_out = FWD_D2;
 		end
 		else begin
 			fwd_out = FWD_NH;
@@ -257,14 +257,11 @@ module hazard_comparator_rb(
 
 	output FWD_SELECT fwd_out
 );
-
+	// depend on nearest inst
 	// the value of rb might be used in mem stage (sw)
 	always_comb begin
 		if (inst_sw && ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_S1;
-		end
-		else if (inst_sw && me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
-			fwd_out = FWD_S2;
 		end
 		else if (inst_sw && ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_S3;
@@ -272,11 +269,14 @@ module hazard_comparator_rb(
 		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_D1;
 		end 
-		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
-			fwd_out = FWD_D2;
-		end
 		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_D3;
+		end
+		else if (inst_sw && me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
+			fwd_out = FWD_S2;
+		end
+		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
+			fwd_out = FWD_D2;
 		end
 		else begin
 			fwd_out = FWD_NH;
