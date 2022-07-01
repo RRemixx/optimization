@@ -8,10 +8,6 @@
 
     li  x1, 0x1       /*x1=1*/
     li  x2, 0x2        /*x2=2*/
-    nop
-    nop
-    nop
-    nop
     bne x1, x2, loop #   /*branch taken*/
     add x3, x2, x1        
     add x1, x2, x2      

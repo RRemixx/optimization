@@ -4,25 +4,21 @@ program.debug.elf:     file format elf32-littleriscv
 
 Disassembly of section .text:
 
-00000000 <loop-0x34>:
+00000000 <loop-0x24>:
    0:	00100093          	addi	x1,x0,1
    4:	00200113          	addi	x2,x0,2
-   8:	00000013          	addi	x0,x0,0
-   c:	00000013          	addi	x0,x0,0
-  10:	00000013          	addi	x0,x0,0
-  14:	00000013          	addi	x0,x0,0
-  18:	00209e63          	bne	x1,x2,34 <loop>
-  1c:	001101b3          	add	x3,x2,x1
-  20:	002100b3          	add	x1,x2,x2
-  24:	00208233          	add	x4,x1,x2
-  28:	00000013          	addi	x0,x0,0
-  2c:	00000013          	addi	x0,x0,0
-  30:	10500073          	wfi
+   8:	00209e63          	bne	x1,x2,24 <loop>
+   c:	001101b3          	add	x3,x2,x1
+  10:	002100b3          	add	x1,x2,x2
+  14:	00208233          	add	x4,x1,x2
+  18:	00000013          	addi	x0,x0,0
+  1c:	00000013          	addi	x0,x0,0
+  20:	10500073          	wfi
 
-00000034 <loop>:
-  34:	001102b3          	add	x5,x2,x1
-  38:	002100b3          	add	x1,x2,x2
-  3c:	10500073          	wfi
+00000024 <loop>:
+  24:	001102b3          	add	x5,x2,x1
+  28:	002100b3          	add	x1,x2,x2
+  2c:	10500073          	wfi
 	...
 
 Disassembly of section .riscv.attributes:
@@ -32,7 +28,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	.2byte	0x0
    4:	7200                	.2byte	0x7200
    6:	7369                	.2byte	0x7369
-   8:	01007663          	bgeu	x0,x16,14 <loop-0x20>
+   8:	01007663          	bgeu	x0,x16,14 <loop-0x10>
    c:	0018                	.2byte	0x18
    e:	0000                	.2byte	0x0
   10:	7205                	.2byte	0x7205

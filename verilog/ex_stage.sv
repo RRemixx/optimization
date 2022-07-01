@@ -124,7 +124,19 @@ module ex_stage(
 	assign ex_packet_out.mem_use_by_mem = ex_packet_out.valid & (ex_packet_out.rd_mem | ex_packet_out.wr_mem);
 
 	logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
+	logic [`XLEN-1:0] fwd_rs1_val, fwd_rs2_val;
 	logic brcond_result;
+
+	assign fwd_rs1_val = (id_ex_packet_in.ra_fwd_type == FWD_D1) ? fwd_ex_result : 
+			(id_ex_packet_in.ra_fwd_type == FWD_D2 | id_ex_packet_in.ra_fwd_type == FWD_D3) ? fwd_mem_result :
+						id_ex_packet_in.rs1_value;
+
+	assign fwd_rs2_val = (id_ex_packet_in.rb_fwd_type == FWD_D1) ? fwd_ex_result : 
+			(id_ex_packet_in.rb_fwd_type == FWD_D2 | id_ex_packet_in.rb_fwd_type == FWD_D3) ? fwd_mem_result :
+						id_ex_packet_in.rs2_value;
+
+
+
 	//
 	// ALU opA mux
 	//
@@ -192,8 +204,10 @@ module ex_stage(
 	 // instantiate the branch condition tester
 	 //
 	brcond brcond (// Inputs
-		.rs1(id_ex_packet_in.rs1_value), 
-		.rs2(id_ex_packet_in.rs2_value),
+		// .rs1(id_ex_packet_in.rs1_value), 
+		// .rs2(id_ex_packet_in.rs2_value),
+		.rs1(fwd_rs1_val), 
+		.rs2(fwd_rs2_val),
 		.func(id_ex_packet_in.inst.b.funct3), // inst bits to determine check
 
 		// Output

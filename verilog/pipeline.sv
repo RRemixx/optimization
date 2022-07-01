@@ -160,8 +160,10 @@ module pipeline (
 		.mem_use_by_mem(ex_mem_packet.mem_use_by_mem),
 
 		.load_use_stall(id_packet.load_use_stall),
-		.ex_mem_take_branch(mem_wb_take_branch),
-		.ex_mem_target_pc(mem_wb_result),
+		// .ex_mem_take_branch(mem_wb_take_branch),
+		// .ex_mem_target_pc(mem_wb_result),
+		.ex_mem_take_branch(ex_mem_packet.take_branch),
+		.ex_mem_target_pc(ex_mem_packet.alu_result),
 		.Imem2proc_data(mem2proc_data),
 		
 		// Outputs
