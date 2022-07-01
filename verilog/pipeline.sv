@@ -184,7 +184,7 @@ module pipeline (
 	assign if_id_enable = !id_packet.load_use_stall; // if stall, disable write if/id
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset || squash || ex_mem_packet.mem_use_by_mem) begin 
+		if (reset || squash || (ex_mem_packet.mem_use_by_mem && !id_packet.load_use_stall)) begin 
 			if_id_packet.inst  <= `SD `NOP;
 			if_id_packet.valid <= `SD `FALSE;
             if_id_packet.NPC   <= `SD 0;

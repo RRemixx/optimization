@@ -260,11 +260,14 @@ module hazard_comparator_rb(
 
 	// the value of rb might be used in mem stage (sw)
 	always_comb begin
-		if (inst_sw && ex_dp.dest_reg_idx != 0 && ra_idx == ex_dp.dest_reg_idx) begin
+		if (inst_sw && ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_S1;
 		end
 		else if (inst_sw && me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
 			fwd_out = FWD_S2;
+		end
+		else if (inst_sw && ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
+			fwd_out = FWD_S3;
 		end
 		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_D1;
@@ -293,6 +296,7 @@ module detector(
 	input illegal,
 	input is_load,
 	input is_store,
+	input load_use_stall,
 	input [4:0] ra_idx,
 	input [4:0] rb_idx,
 	input [4:0] dest_idx,
@@ -314,7 +318,7 @@ module detector(
 			wb_dp.dest_reg_idx <= `SD `ZERO_REG;
 			wb_dp.inst_is_load <= `SD 1'b0;
 		end
-		else if (illegal) begin
+		else if (illegal || load_use_stall) begin
 			wb_dp              <= `SD me_dp;
 			me_dp              <= `SD ex_dp;
 			ex_dp.dest_reg_idx <= `SD `ZERO_REG;
@@ -402,6 +406,7 @@ module id_stage(
 		.illegal(id_packet_out.illegal),
 		.is_load(id_packet_out.rd_mem),
 		.is_store(id_packet_out.wr_mem),
+		.load_use_stall(id_packet_out.load_use_stall),
 		.ra_idx(if_id_packet_in.inst.r.rs1),
 		.rb_idx(if_id_packet_in.inst.r.rs2),
 		.dest_idx(id_packet_out.dest_reg_idx),
@@ -409,6 +414,6 @@ module id_stage(
 		.rb_fwd_out(id_packet_out.rb_fwd_type)
 	);
 
-	assign id_packet_out.load_use_stall = (id_packet_out.ra_fwd_type == FWD_D3) | (id_packet_out.ra_fwd_type == FWD_D3);    // load use hazard or not
+	assign id_packet_out.load_use_stall = (id_packet_out.ra_fwd_type == FWD_D3) | (id_packet_out.rb_fwd_type == FWD_D3)  | (id_packet_out.rb_fwd_type == FWD_S3);    // load use hazard or not
    
 endmodule // module id_stage

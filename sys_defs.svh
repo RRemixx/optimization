@@ -74,7 +74,8 @@ typedef enum logic [2:0] {
 	FWD_D2 = 3'h2,		// forward from wb
 	FWD_D3 = 3'h3,     	// load and use
 	FWD_S1 = 3'h4,		// sw from mem
-	FWD_S2 = 3'h5     	// sw from wb
+	FWD_S2 = 3'h5,     	// sw from wb
+	FWD_S3 = 3'h6		// load and use
 } FWD_SELECT;
 
 

@@ -109,8 +109,10 @@ module ex_stage(
 	assign ex_packet_out.NPC = id_ex_packet_in.NPC;
 	
 	// sw forward datapath
-	assign ex_packet_out.rs2_value = (id_ex_packet_in.rb_fwd_type == FWD_S1) ? fwd_ex_result  : 
-									 (id_ex_packet_in.rb_fwd_type == FWD_S1) ? fwd_mem_result :
+	// case considered: rs1 is D3 (which means rs2 is not S1), then if rs2 is S2, no need to forward
+	assign ex_packet_out.rs2_value = (id_ex_packet_in.ra_fwd_type == FWD_D3 & id_ex_packet_in.rb_fwd_type == FWD_S2) ? id_ex_packet_in.rs2_value : 
+									 (id_ex_packet_in.rb_fwd_type == FWD_S1) ? fwd_ex_result : 
+									 (id_ex_packet_in.rb_fwd_type == FWD_S2 | id_ex_packet_in.rb_fwd_type == FWD_S3) ? fwd_mem_result :
 									 id_ex_packet_in.rs2_value;
 
 	assign ex_packet_out.rd_mem = id_ex_packet_in.rd_mem;
@@ -126,12 +128,18 @@ module ex_stage(
 	logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
 	logic [`XLEN-1:0] fwd_rs1_val, fwd_rs2_val;
 	logic brcond_result;
-
-	assign fwd_rs1_val = (id_ex_packet_in.ra_fwd_type == FWD_D1) ? fwd_ex_result : 
+	
+	// case considered: rs2 is D3 or S3 (which means rs1 is not D1), then if rs1 is D2, no need to forward
+	assign fwd_rs1_val = (id_ex_packet_in.rb_fwd_type == FWD_D3 | id_ex_packet_in.rb_fwd_type == FWD_S3 & id_ex_packet_in.ra_fwd_type == FWD_D2) 
+																							? id_ex_packet_in.rs1_value : 
+													(id_ex_packet_in.ra_fwd_type == FWD_D1) ? fwd_ex_result : 
 			(id_ex_packet_in.ra_fwd_type == FWD_D2 | id_ex_packet_in.ra_fwd_type == FWD_D3) ? fwd_mem_result :
-						id_ex_packet_in.rs1_value;
+																							  id_ex_packet_in.rs1_value;
 
-	assign fwd_rs2_val = (id_ex_packet_in.rb_fwd_type == FWD_D1) ? fwd_ex_result : 
+	// case considered: rs1 is D3 (which means rs2 is not D1), then if rs2 is D2, no need to forward
+	assign fwd_rs2_val = (id_ex_packet_in.ra_fwd_type == FWD_D3 & id_ex_packet_in.rb_fwd_type == FWD_D2) 
+																							? id_ex_packet_in.rs2_value : 
+													(id_ex_packet_in.rb_fwd_type == FWD_D1) ? fwd_ex_result : 
 			(id_ex_packet_in.rb_fwd_type == FWD_D2 | id_ex_packet_in.rb_fwd_type == FWD_D3) ? fwd_mem_result :
 						id_ex_packet_in.rs2_value;
 
@@ -143,19 +151,7 @@ module ex_stage(
 	always_comb begin
 		opa_mux_out = `XLEN'hdeadfbac;
 		case (id_ex_packet_in.opa_select)
-			OPA_IS_RS1:  begin
-				case (id_ex_packet_in.ra_fwd_type)
-					FWD_NH : begin
-						opa_mux_out = id_ex_packet_in.rs1_value;
-					end
-					FWD_D1 : begin
-						opa_mux_out = fwd_ex_result;
-					end
-					FWD_D2 : opa_mux_out = fwd_mem_result;
-					FWD_D3 : opa_mux_out = fwd_mem_result;
-					default : opa_mux_out = id_ex_packet_in.rs1_value;
-				endcase
-			end
+			OPA_IS_RS1:  opa_mux_out = fwd_rs1_val;
 			OPA_IS_NPC:  opa_mux_out = id_ex_packet_in.NPC;
 			OPA_IS_PC:   opa_mux_out = id_ex_packet_in.PC;
 			OPA_IS_ZERO: opa_mux_out = 0;
@@ -170,15 +166,7 @@ module ex_stage(
 		// value on the output of the mux you have an invalid opb_select
 		opb_mux_out = `XLEN'hfacefeed;
 		case (id_ex_packet_in.opb_select)
-			OPB_IS_RS2:  begin
-				case (id_ex_packet_in.rb_fwd_type)
-					FWD_NH : opb_mux_out = id_ex_packet_in.rs2_value;
-					FWD_D1 : opb_mux_out = fwd_ex_result;
-					FWD_D2 : opb_mux_out = fwd_mem_result;
-					FWD_D3 : opb_mux_out = fwd_mem_result;
-					default : opb_mux_out = id_ex_packet_in.rs2_value;
-				endcase
-			end
+			OPB_IS_RS2:   opb_mux_out = fwd_rs2_val;
 			OPB_IS_I_IMM: opb_mux_out = `RV32_signext_Iimm(id_ex_packet_in.inst);
 			OPB_IS_S_IMM: opb_mux_out = `RV32_signext_Simm(id_ex_packet_in.inst);
 			OPB_IS_B_IMM: opb_mux_out = `RV32_signext_Bimm(id_ex_packet_in.inst);
