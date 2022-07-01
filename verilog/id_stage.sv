@@ -220,7 +220,35 @@ module decoder(
 endmodule // decoder
 
 
-module hazard_comparator(
+module hazard_comparator_ra(
+	input DETECTOR_PACKET ex_dp,
+	input DETECTOR_PACKET me_dp,
+	input DETECTOR_PACKET wb_dp,
+	input [4:0] ra_idx,
+	input inst_sw,    // if inst is sw
+
+	output FWD_SELECT fwd_out
+);
+	
+	// ra will not be used for mem stage
+	always_comb begin
+		if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load != 1 && ra_idx == ex_dp.dest_reg_idx) begin
+			fwd_out = FWD_D1;
+		end 
+		else if (me_dp.dest_reg_idx != 0 && ra_idx == me_dp.dest_reg_idx) begin
+			fwd_out = FWD_D2;
+		end
+		else if (ex_dp.dest_reg_idx != 0 && ex_dp.inst_is_load == 1 && ra_idx == ex_dp.dest_reg_idx) begin
+			fwd_out = FWD_D3;
+		end
+		else begin
+			fwd_out = FWD_NH;
+		end
+	end
+
+endmodule
+
+module hazard_comparator_rb(
 	input DETECTOR_PACKET ex_dp,
 	input DETECTOR_PACKET me_dp,
 	input DETECTOR_PACKET wb_dp,
@@ -230,6 +258,7 @@ module hazard_comparator(
 	output FWD_SELECT fwd_out
 );
 
+	// the value of rb might be used in mem stage (sw)
 	always_comb begin
 		if (inst_sw && ex_dp.dest_reg_idx != 0 && ra_idx == ex_dp.dest_reg_idx) begin
 			fwd_out = FWD_S1;
@@ -252,6 +281,10 @@ module hazard_comparator(
 	end
 
 endmodule
+
+
+
+
 
 module detector(
 	input reset,
@@ -296,9 +329,9 @@ module detector(
 	end
 
 	// ra
-	hazard_comparator hc_ra (ex_dp, me_dp, wb_dp, ra_idx, is_store, ra_fwd_out);
+	hazard_comparator_ra hc_ra (ex_dp, me_dp, wb_dp, ra_idx, is_store, ra_fwd_out);
 	// rb
-	hazard_comparator hc_rb (ex_dp, me_dp, wb_dp, rb_idx, is_store, rb_fwd_out);
+	hazard_comparator_rb hc_rb (ex_dp, me_dp, wb_dp, rb_idx, is_store, rb_fwd_out);
 	
 endmodule
 

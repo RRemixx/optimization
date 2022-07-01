@@ -98,6 +98,11 @@ module pipeline (
 	logic [`XLEN-1:0] proc2Dmem_addr;
 	logic [`XLEN-1:0] proc2Dmem_data;
 	logic [1:0]  proc2Dmem_command;
+
+
+	logic squash;    // flush is branch taken
+	// logic mem_target_pc;
+
 	MEM_SIZE proc2Dmem_size;
 
 	// Outputs from MEM/WB Pipeline Register
@@ -111,6 +116,8 @@ module pipeline (
 	logic [`XLEN-1:0] wb_reg_wr_data_out;
 	logic  [4:0] wb_reg_wr_idx_out;
 	logic        wb_reg_wr_en_out;
+
+	assign squash = ex_mem_packet.take_branch;
 	
 	assign pipeline_completed_insts = {3'b0, mem_wb_valid_inst};
 	assign pipeline_error_status =  mem_wb_illegal             ? ILLEGAL_INST :
@@ -153,8 +160,8 @@ module pipeline (
 		.mem_use_by_mem(ex_mem_packet.mem_use_by_mem),
 
 		.load_use_stall(id_packet.load_use_stall),
-		.ex_mem_take_branch(ex_mem_packet.take_branch),
-		.ex_mem_target_pc(ex_mem_packet.alu_result),
+		.ex_mem_take_branch(mem_wb_take_branch),
+		.ex_mem_target_pc(mem_wb_result),
 		.Imem2proc_data(mem2proc_data),
 		
 		// Outputs
@@ -175,7 +182,7 @@ module pipeline (
 	assign if_id_enable = !id_packet.load_use_stall; // if stall, disable write if/id
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset || ex_mem_packet.take_branch || ex_mem_packet.mem_use_by_mem) begin 
+		if (reset || squash || ex_mem_packet.mem_use_by_mem) begin 
 			if_id_packet.inst  <= `SD `NOP;
 			if_id_packet.valid <= `SD `FALSE;
             if_id_packet.NPC   <= `SD 0;
@@ -224,7 +231,7 @@ module pipeline (
 	assign id_ex_enable = 1'b1; // always enabled
 	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset || ex_mem_packet.take_branch) begin
+		if (reset || squash) begin
 			id_ex_packet <= `SD '{
 			    FWD_NH,
 			    FWD_NH,
@@ -312,10 +319,11 @@ module pipeline (
 	always_ff @(posedge clock) begin
 		// $display("alu_result_ex_mem is %d", ex_mem_packet.alu_result);
 		// $display("alu_result_ex is %d", ex_packet.alu_result);
-		if (reset || ex_mem_packet.take_branch) begin
+		if (reset || squash) begin
 			ex_mem_IR     <= `SD `NOP;
 			ex_mem_packet <= `SD 0;
-		end else begin
+		end 
+		else begin
 			if (ex_mem_enable)   begin
 				// these are forwarded directly from ID/EX registers, only for debugging purposes
 				ex_mem_IR     <= `SD id_ex_IR;
@@ -338,6 +346,9 @@ module pipeline (
 		.Dmem2proc_data(mem2proc_data[`XLEN-1:0]),
 		
 		// Outputs
+		// .squash_res(squash),
+		// .mem_target_pc(mem_target_pc),
+
 		.mem_result_out(mem_result_out),
 		.proc2Dmem_command(proc2Dmem_command),
 		.proc2Dmem_size(proc2Dmem_size),

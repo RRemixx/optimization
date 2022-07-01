@@ -22,6 +22,8 @@ module mem_stage(
 	input  EX_MEM_PACKET ex_mem_packet_in,      // write memory? (from decoder)
 	input  [`XLEN-1:0] Dmem2proc_data,
 	
+	// output logic squash_res,
+
 	output logic [`XLEN-1:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
 	output logic [1:0] proc2Dmem_command,
 	output MEM_SIZE proc2Dmem_size,
@@ -29,7 +31,7 @@ module mem_stage(
 	output logic [`XLEN-1:0] proc2Dmem_data      // Data sent to data-memory
 );
 
-
+	// assign squash_res = ex_mem_packet_in.take_branch;
 
 	// Determine the command that must be sent to mem
 	assign proc2Dmem_command =
